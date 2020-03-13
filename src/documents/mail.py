@@ -187,7 +187,16 @@ class MailFetcher(Loggable):
                 self.log("info", 'Storing email: "{}"'.format(message.subject))
 
                 t = int(time.mktime(message.time.timetuple()))
-                file_name = os.path.join(self.consume, message.file_name)
+                name, ext = os.path.splitext(message.file_name)
+                count, suffix = 0, ''
+                while True:
+                    file_name = os.path.join(self.consume, name + suffix + ext)
+                    if os.path.exists(file_name):
+                        count += 1
+                        suffix = ' {}'.format(count)
+                    else:
+                        break
+
                 with open(file_name, "wb") as f:
                     f.write(message.attachment.data)
                     os.utime(file_name, times=(t, t))
